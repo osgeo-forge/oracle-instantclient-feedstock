@@ -1,0 +1,105 @@
+{% set version = "12.2.0.1.0" %}
+{% macro recipe_parent() -%}
+  file:///{{ RECIPE_DIR|replace("\\", "/")|urlencode|replace("%3A", ":")|replace("/recipe", "") }}
+{%- endmacro %}
+
+package:
+  name: oracle-instantclient-split
+  version: {{ version }}
+
+source:
+  # Place downloaded archives in ../pkgs folder
+  # Ref: https://www.oracle.com/technetwork/topics/winx64soft-089540.html
+  {% if win %}
+  - url: {{ recipe_parent() }}/pkgs/instantclient-basic-windows.x64-{{ version }}.zip
+    sha256: db0ced2fd5e9a7eee39a284ee620ef4b90ff7a576ca495c3ba412e384d7a3aec
+  - url: {{ recipe_parent() }}/pkgs/instantclient-sdk-windows.x64-{{ version }}.zip
+    sha256: 1cafa148af515fc419b13b6a8c295505a2b28152a85a6d8a1c7e921dc9f42831
+  - url: {{ recipe_parent() }}/pkgs/instantclient-sqlplus-windows.x64-{{ version }}.zip
+    sha256: 55de0be719bfde688c63b1383df03a85f359a101884f6f6e02941e26035b325a
+  - url: {{ recipe_parent() }}/pkgs/instantclient-odbc-windows.x64-{{ version }}-2.zip
+    sha256: 8976751b65f04705407cd7014394f607bdd35856290c3abb40c621673fbf1717
+  {% else %}
+  # temp fix for smithy recipe linting
+  - path: .
+  {% endif %}
+
+build:
+  number: 1000
+  skip: True  # [not win]
+
+requirements:
+  build:
+  host:
+  run:
+
+outputs:
+  - name: oracle-oci-libs
+    script: install_libs.sh    # [unix]
+    script: install_libs.bat   # [win]
+
+    build:
+      run_exports:
+        # I think patch version level is good enough (maybe minor is better?)
+        - {{ pin_subpackage('oracle-oci-libs', max_pin='x.x.x') }}
+
+    requirements:
+      build:
+      host:
+      run:
+        - vs2013_runtime  # [win]
+
+    test:
+      commands:
+        {% if win %}
+        - if not exist %LIBRARY_INC%\\oci\\oci.h exit 1
+        - if not exist %LIBRARY_LIB%\\vc14\\oraocci12.lib exit 1
+        - if not exist %LIBRARY_BIN%\\oci.dll exit 1
+        {% endif %}
+
+    about:
+      summary: 'Client libraries/headers to connect to a local or remote Oracle Database'
+
+  - name: oracle-instantclient
+    script: install_client.sh    # [unix]
+    script: install_client.bat   # [win]
+
+    build:
+
+    requirements:
+      build:
+      host:
+      run:
+        - {{ pin_subpackage('oracle-oci-libs', exact=True) }}
+        - vs2013_runtime  # [win]
+
+    test:
+      commands:
+        {% if win %}
+        - if not exist %LIBRARY_INC%\\oci\\oci.h exit 1
+        - if not exist %LIBRARY_LIB%\\vc14\\oraocci12.lib exit 1
+        - if not exist %LIBRARY_BIN%\\sqlplus.exe exit 1
+        - if not exist %LIBRARY_BIN%\\odbc_install.exe exit 1
+        {% endif %}
+
+    about:
+      summary: 'Client to connect to a local or remote Oracle Database'
+
+about:
+  home: https://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html
+  license: OTN
+  license_file: License.txt
+  summary: Client to connect to a local or remote Oracle Database
+  description: |
+    Oracle Instant Client enables applications to connect to a local or remote
+    Oracle Database for development and production deployment. The Instant
+    Client libraries provide the necessary network connectivity, as well as
+    basic and high end data features, to make full use of Oracle Database. It
+    underlies the Oracle APIs of popular languages and environments including
+    Node.js, Python and PHP, as well as providing access for OCI, OCCI, JDBC,
+    ODBC and Pro*C applications.
+  doc_url: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/lnoci/instant-client.html
+
+extra:
+  recipe-maintainers:
+    - dakcarto
