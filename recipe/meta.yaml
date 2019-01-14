@@ -25,7 +25,7 @@ source:
   {% endif %}
 
 build:
-  number: 1000
+  number: 1001
   skip: True  # [not win]
 
 requirements:
@@ -58,7 +58,11 @@ outputs:
         {% endif %}
 
     about:
-      summary: 'Client libraries/headers to connect to a local or remote Oracle Database'
+      home: https://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html
+      license: OTN
+      license_file: License.txt
+      summary: Client libraries/headers to connect to a local or remote Oracle Database
+      doc_url: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/lnoci/instant-client.html
 
   - name: oracle-instantclient
     script: install_client.sh    # [unix]
@@ -83,7 +87,19 @@ outputs:
         {% endif %}
 
     about:
-      summary: 'Client to connect to a local or remote Oracle Database'
+      home: https://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html
+      license: OTN
+      license_file: License.txt
+      summary: Client to connect to a local or remote Oracle Database
+      description: |
+        Oracle Instant Client enables applications to connect to a local or remote
+        Oracle Database for development and production deployment. The Instant
+        Client libraries provide the necessary network connectivity, as well as
+        basic and high end data features, to make full use of Oracle Database. It
+        underlies the Oracle APIs of popular languages and environments including
+        Node.js, Python and PHP, as well as providing access for OCI, OCCI, JDBC,
+        ODBC and Pro*C applications.
+      doc_url: https://docs.oracle.com/en/database/oracle/oracle-database/12.2/lnoci/instant-client.html
 
 about:
   home: https://www.oracle.com/technetwork/database/database-technologies/instant-client/overview/index.html
